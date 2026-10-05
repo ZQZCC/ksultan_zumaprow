@@ -134,6 +134,7 @@ jobs:
             KSU
             KSU_TINYFS_SUCOMPAT
             KSU_TINYFS_NO_SETUID
+            KSU_TINYFS_PKG_OBSERVER
             KSU_EXTRAS
             KSU_THRONE_TRACKER_ALWAYS_THREADED
             SECURITY_NETWORK
@@ -194,6 +195,8 @@ jobs:
             NET_SCH_FQ
             KSU_TINYFS_SUCOMPAT
             KSU_TINYFS_NO_SETUID
+            KSU_TINYFS_PKG_OBSERVER
+            KSU_THRONE_TRACKER_ALWAYS_THREADED
             "$default_cong_config"
           )
           for config in "${required_configs[@]}"; do
