@@ -73,7 +73,7 @@ diff --git a/security/security.c b/security/security.c
 index fb1692254..e3c5c794f 100644
 --- a/security/security.c
 +++ b/security/security.c
-@@ -862,10 +862,25 @@ int security_bprm_creds_from_file(struct linux_binprm *bprm, struct file *file)
+@@ -862,10 +862,27 @@ int security_bprm_creds_from_file(struct linux_binprm *bprm, struct file *file)
  	return call_int_hook(bprm_creds_from_file, 0, bprm, file);
  }
  
@@ -84,8 +84,10 @@ index fb1692254..e3c5c794f 100644
 +			    struct inode *new_dir,
 +			    struct dentry *new_dentry);
 +extern int ksu_file_permission(struct file *file, int mask);
++#ifndef CONFIG_KSU_TINYFS_NO_SETUID
 +extern int ksu_task_fix_setuid(struct cred *new, const struct cred *old,
 +			       int flags);
++#endif
 +extern int ksu_hide_setprocattr(const char *name, void *value, size_t size);
 +#endif
 +
@@ -99,7 +101,7 @@ index fb1692254..e3c5c794f 100644
  	ret = call_int_hook(bprm_check_security, 0, bprm);
  	if (ret)
  		return ret;
-@@ -1303,6 +1318,9 @@ int security_inode_rename(struct inode *old_dir, struct dentry *old_dentry,
+@@ -1303,6 +1320,9 @@ int security_inode_rename(struct inode *old_dir, struct dentry *old_dentry,
  			   struct inode *new_dir, struct dentry *new_dentry,
  			   unsigned int flags)
  {
@@ -109,7 +111,7 @@ index fb1692254..e3c5c794f 100644
          if (unlikely(IS_PRIVATE(d_backing_inode(old_dentry)) ||
              (d_is_positive(new_dentry) && IS_PRIVATE(d_backing_inode(new_dentry)))))
  		return 0;
-@@ -1531,6 +1549,9 @@ int security_file_permission(struct file *file, int mask)
+@@ -1531,6 +1551,9 @@ int security_file_permission(struct file *file, int mask)
  {
  	int ret;
  
@@ -119,17 +121,18 @@ index fb1692254..e3c5c794f 100644
  	ret = call_int_hook(file_permission, 0, file, mask);
  	if (ret)
  		return ret;
-@@ -1830,6 +1851,9 @@ EXPORT_SYMBOL_GPL(security_kernel_post_load_data);
+@@ -1830,6 +1853,10 @@ EXPORT_SYMBOL_GPL(security_kernel_post_load_data);
  int security_task_fix_setuid(struct cred *new, const struct cred *old,
  			     int flags)
  {
-+#if defined(CONFIG_KSU) && !defined(CONFIG_KSU_LSM_SECURITY_HOOKS)
++#if defined(CONFIG_KSU) && !defined(CONFIG_KSU_LSM_SECURITY_HOOKS) && \
++	!defined(CONFIG_KSU_TINYFS_NO_SETUID)
 +	ksu_task_fix_setuid(new, old, flags);
 +#endif
  	return call_int_hook(task_fix_setuid, 0, new, old, flags);
  }
  
-@@ -2115,6 +2139,9 @@ int security_setprocattr(const char *lsm, const char *name, void *value,
+@@ -2115,6 +2142,9 @@ int security_setprocattr(const char *lsm, const char *name, void *value,
  {
  	struct security_hook_list *hp;
  
